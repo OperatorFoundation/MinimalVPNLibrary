@@ -18,6 +18,7 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
 
     public override init()
     {
+        print("MinimalVPNPacketTunnel: init called")
         /*
          This is what personaServerInfo.json should look like
          {
@@ -52,9 +53,11 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
 
     public override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void)
     {
+        print("MinimalVPNPacketTunnel: startTunnel called")
+        
         guard let serverInfo = self.serverInfo else
         {
-            print("MinimalVPNPacketTunnel: could not find the .json with server info")
+            print("MinimalVPNPacketTunnel: could not find the JSON file with server info")
             completionHandler(PacketTunnelErrors.serverInfoNotFound)
             return
         }
