@@ -40,7 +40,7 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
         }
         catch
         {
-            print("Failed to get server info. Error: \(error)")
+            print("MinimalVPNPacketTunnel: Failed to get server info. Error: \(error)")
         }
         
         self.logger = Logger(label: "MinimalVPNPacketTunnelLog")
@@ -79,7 +79,7 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
         
         self.connection = self.createTCPConnection(to: NWHostEndpoint(hostname: hostName, port: port), enableTLS: false, tlsParameters: nil, delegate: nil)
         
-        self.logger.debug("startTunnel created a connection. Connection state: \(connection.state)")
+        self.logger.debug("MinimalVPNPacketTunnel: startTunnel created a connection. Connection state: \(connection.state)")
         
         self.connection.write("hello".data(using: .utf8)!)
         {
@@ -87,15 +87,14 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
 
             if let writeError = maybeWriteError
             {
-                self.logger.error("startTunnel received an error trying to write to the connection: \(writeError)")
+                self.logger.error("MinimalVPNPacketTunnel: startTunnel received an error trying to write to the connection: \(writeError)")
                 completionHandler(writeError)
                 return
             }
             else
             {
-                self.logger.debug("startTunnel wrote some data")
+                self.logger.debug("MinimalVPNPacketTunnel: startTunnel wrote some data")
             }
-            //return
         }
 //        connection.stateUpdateHandler =
 //        {

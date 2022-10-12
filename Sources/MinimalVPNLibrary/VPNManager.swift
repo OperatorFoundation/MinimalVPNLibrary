@@ -17,19 +17,20 @@ public class VPNManager
     public init(serverIP: String)
     {
         self.serverIP = serverIP
+        self.manager.isEnabled = false
     }
 
-    public func load()
-    {
-        print("Loading...")
-
-        self.manager.loadFromPreferences
-        {
-            maybeError in
-
-            print("Loaded.")
-        }
-    }
+//    public func load()
+//    {
+//        print("Loading...")
+//
+//        self.manager.loadFromPreferences
+//        {
+//            maybeError in
+//
+//            print("Loaded.")
+//        }
+//    }
 
     public func enable()
     {
@@ -41,8 +42,9 @@ public class VPNManager
             if let loadError = maybeLoadError
             {
                 print("VPNManager encountered an error loading from preferences: \(loadError)")
+                self.manager.isEnabled = false
+                return
             }
-            
 
             self.manager.saveToPreferences
             {
@@ -59,6 +61,9 @@ public class VPNManager
                     if let nextLoadError = maybeNextLoadError
                     {
                         print("VPNManager encountered an error on second load from preferences: \(nextLoadError)")
+                        
+                        self.manager.isEnabled = false
+                        return
                     }
 
                     let protocolConfiguration = NETunnelProviderProtocol()
