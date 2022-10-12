@@ -9,12 +9,39 @@ import Logging
 import Network
 import NetworkExtension
 
+import SwiftTestUtils
+
 open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
     var logger: Logger
     var connection: NWTCPConnection! = nil
+    var serverInfo: TestStrings? = nil
 
     public override init()
     {
+        /*
+         This is what personaServerInfo.json should look like
+         {
+           "testValueArray" : [
+               {
+                 "name" : "serverIP",
+                 "value" : "127.0.0.1"
+               },
+               {
+                 "name" : "serverPort",
+                 "value" : "1234"
+               }
+           ]
+         }
+         */
+        do
+        {
+            self.serverInfo = try TestStrings(jsonPathFromHomeDirectory: "Desktop/personaServerInfo.json")
+        }
+        catch
+        {
+            print("Failed to get server info. Error: \(error)")
+        }
+        
         self.logger = Logger(label: "MinimalVPNPacketTunnelLog")
         self.logger.logLevel = .debug
 
@@ -23,10 +50,31 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
         super.init()
     }
 
-    public override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void) {
-        completionHandler(nil)
+    public override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void)
+    {
+        guard let serverInfo = self.serverInfo else
+        {
+            print("MinimalVPNPacketTunnel: could not find the .json with server info")
+            completionHandler(PacketTunnelErrors.serverInfoNotFound)
+            return
+        }
 
-        self.connection = self.createTCPConnection(to: NWHostEndpoint(hostname: "127.0.0.1", port: "notAPort"), enableTLS: false, tlsParameters: nil, delegate: nil)
+        guard let hostName = serverInfo.fetchValue(name: "serverIP") else
+        {
+            print("MinimalVPNPacketTunnel: could not find the serverIP value")
+            completionHandler(PacketTunnelErrors.hostNotFound)
+            return
+        }
+        guard let port = serverInfo.fetchValue(name: "serverPort") else
+        {
+            print("MinimalVPNPacketTunnel: could not find the serverPort value")
+            completionHandler(PacketTunnelErrors.portNotFound)
+            return
+        }
+        
+        print("MinimalVPNPacketTunnel: creating a TCP connection to \(hostName):\(port)")
+        
+        self.connection = self.createTCPConnection(to: NWHostEndpoint(hostname: hostName, port: port), enableTLS: false, tlsParameters: nil, delegate: nil)
         
         self.logger.debug("startTunnel created a connection. Connection state: \(connection.state)")
         
@@ -37,6 +85,8 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
             if let writeError = maybeWriteError
             {
                 self.logger.error("startTunnel received an error trying to write to the connection: \(writeError)")
+                completionHandler(writeError)
+                return
             }
             else
             {
@@ -44,7 +94,6 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
             }
             //return
         }
-
 //        connection.stateUpdateHandler =
 //        {
 //            (state: NWConnection.State) in
@@ -63,6 +112,7 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
 //                    return
 //            }
 //        }
+        completionHandler(nil)
     }
         
     public override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
@@ -85,4 +135,10 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
     public override func wake() {
         // Add code here to wake up.
     }
+}
+
+public enum PacketTunnelErrors: Error {
+    case serverInfoNotFound
+    case hostNotFound
+    case portNotFound
 }
