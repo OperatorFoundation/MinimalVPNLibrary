@@ -11,7 +11,7 @@ import NetworkExtension
 
 public class VPNManager
 {
-    let manager = NETunnelProviderManager()
+    public let manager = NETunnelProviderManager()
 
     public init()
     {
