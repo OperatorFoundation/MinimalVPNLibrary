@@ -9,7 +9,7 @@ import Logging
 import Network
 import NetworkExtension
 
-public class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
+open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
     var logger: Logger
     var connection: NWTCPConnection! = nil
 
