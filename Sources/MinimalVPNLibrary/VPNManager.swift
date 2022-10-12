@@ -12,9 +12,11 @@ import NetworkExtension
 public class VPNManager
 {
     public let manager = NETunnelProviderManager()
+    let serverIP: String
 
-    public init()
+    public init(serverIP: String)
     {
+        self.serverIP = serverIP
     }
 
     public func load()
@@ -62,7 +64,7 @@ public class VPNManager
                     let protocolConfiguration = NETunnelProviderProtocol()
                     let appId = Bundle.main.bundleIdentifier!
                     protocolConfiguration.providerBundleIdentifier = "\(appId).MinimalVPNPacketTunnel"
-                    protocolConfiguration.serverAddress = "164.92.71.230"
+                    protocolConfiguration.serverAddress = self.serverIP
                     protocolConfiguration.includeAllNetworks = true
                     self.manager.protocolConfiguration = protocolConfiguration
                     self.manager.localizedDescription = "MinimalVPN"

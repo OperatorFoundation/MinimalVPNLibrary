@@ -12,7 +12,16 @@ import NetworkExtension
 public class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
     var logger: Logger
     var connection: NWTCPConnection! = nil
+    var serverIP: String = "127.0.0.1"
+    var portString: String = "notAPort"
 
+    public convenience init(serverIP: String, portString: String)
+    {
+        self.init()
+        self.serverIP = serverIP
+        self.portString = portString
+    }
+    
     public override init()
     {
         self.logger = Logger(label: "MinimalVPNPacketTunnelLog")
