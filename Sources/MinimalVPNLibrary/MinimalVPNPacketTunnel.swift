@@ -12,16 +12,7 @@ import NetworkExtension
 public class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
     var logger: Logger
     var connection: NWTCPConnection! = nil
-    var serverIP: String = "127.0.0.1"
-    var portString: String = "notAPort"
 
-    public convenience init(serverIP: String, portString: String)
-    {
-        self.init()
-        self.serverIP = serverIP
-        self.portString = portString
-    }
-    
     public override init()
     {
         self.logger = Logger(label: "MinimalVPNPacketTunnelLog")
@@ -35,7 +26,7 @@ public class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
     public override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void) {
         completionHandler(nil)
 
-        self.connection = self.createTCPConnection(to: NWHostEndpoint(hostname: "164.92.71.230", port: "1234"), enableTLS: false, tlsParameters: nil, delegate: nil)
+        self.connection = self.createTCPConnection(to: NWHostEndpoint(hostname: "127.0.0.1", port: "notAPort"), enableTLS: false, tlsParameters: nil, delegate: nil)
         
         self.logger.debug("startTunnel created a connection. Connection state: \(connection.state)")
         
