@@ -11,7 +11,8 @@ import NetworkExtension
 
 import SwiftTestUtils
 
-open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
+open class MinimalVPNPacketTunnel: NEPacketTunnelProvider
+{
     var logger: Logger
     var connection: NWTCPConnection! = nil
     var serverInfo: TestStrings? = nil
@@ -20,17 +21,17 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
     {
         print("MinimalVPNPacketTunnel: init called")
         /*
-         This is what personaServerInfo.json should look like
+        personaServerInfo.json format
          {
-           "testValueArray" : [
-               {
-                 "name" : "serverIP",
-                 "value" : "127.0.0.1"
-               },
-               {
-                 "name" : "serverPort",
-                 "value" : "1234"
-               }
+           "testValueArray": [
+             {
+               "name": "serverIP",
+               "value": "8.8.8.8"
+             },
+             {
+               "name": "serverPort",
+               "value": "1234"
+             }
            ]
          }
          */
@@ -45,7 +46,6 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
         
         self.logger = Logger(label: "MinimalVPNPacketTunnelLog")
         self.logger.logLevel = .debug
-
         self.logger.debug("Initialized MinimalVPNPacketTunnel")
 
         super.init()
@@ -53,7 +53,7 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider {
 
     public override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void)
     {
-        print("MinimalVPNPacketTunnel: startTunnel called")
+        self.logger.debug("MinimalVPNPacketTunnel: startTunnel called")
         
         guard let serverInfo = self.serverInfo else
         {
