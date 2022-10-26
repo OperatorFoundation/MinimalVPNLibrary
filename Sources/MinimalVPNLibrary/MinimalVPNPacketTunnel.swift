@@ -15,35 +15,11 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider
 {
     var logger: Logger
     var connection: NWTCPConnection! = nil
-    var serverInfo: TestStrings? = nil
+    var hostName = ""
+    var port = "1234"
 
     public override init()
     {
-        print("MinimalVPNPacketTunnel: init called")
-        /*
-        personaServerInfo.json format
-         {
-           "testValueArray": [
-             {
-               "name": "serverIP",
-               "value": "8.8.8.8"
-             },
-             {
-               "name": "serverPort",
-               "value": "1234"
-             }
-           ]
-         }
-         */
-        do
-        {
-            self.serverInfo = try TestStrings(jsonPathFromHomeDirectory: "Desktop/personaServerInfo.json")
-        }
-        catch
-        {
-            print("MinimalVPNPacketTunnel: Failed to get server info. Error: \(error)")
-        }
-        
         self.logger = Logger(label: "MinimalVPNPacketTunnelLog")
         self.logger.logLevel = .debug
         self.logger.debug("Initialized MinimalVPNPacketTunnel")
@@ -55,33 +31,19 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider
     {
         self.logger.debug("MinimalVPNPacketTunnel: startTunnel called")
         
-        guard let serverInfo = self.serverInfo else
-        {
-            print("MinimalVPNPacketTunnel: could not find the JSON file with server info")
-            completionHandler(PacketTunnelErrors.serverInfoNotFound)
-            return
-        }
-
-        guard let hostName = serverInfo.fetchValue(name: "serverIP") else
-        {
-            print("MinimalVPNPacketTunnel: could not find the serverIP value")
-            completionHandler(PacketTunnelErrors.hostNotFound)
-            return
-        }
-        guard let port = serverInfo.fetchValue(name: "serverPort") else
-        {
-            print("MinimalVPNPacketTunnel: could not find the serverPort value")
-            completionHandler(PacketTunnelErrors.portNotFound)
-            return
-        }
-        
         print("MinimalVPNPacketTunnel: creating a TCP connection to \(hostName):\(port)")
         
         self.connection = self.createTCPConnection(to: NWHostEndpoint(hostname: hostName, port: port), enableTLS: false, tlsParameters: nil, delegate: nil)
         
         self.logger.debug("MinimalVPNPacketTunnel: startTunnel created a connection. Connection state: \(connection.state)")
         
-        self.connection.write("hello".data(using: .utf8)!)
+        guard let firstMessage = "hello".data(using: .utf8) else
+        {
+            completionHandler(NEVPNError(NEVPNError.configurationReadWriteFailed))
+            return
+        }
+        
+        self.connection.write(firstMessage)
         {
             maybeWriteError in
 
@@ -94,6 +56,7 @@ open class MinimalVPNPacketTunnel: NEPacketTunnelProvider
             else
             {
                 self.logger.debug("MinimalVPNPacketTunnel: startTunnel wrote some data")
+                completionHandler(nil)
             }
         }
 //        connection.stateUpdateHandler =
